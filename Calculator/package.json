@@ -1,0 +1,10 @@
+{
+  "name": "calculator",
+  "description": "command line calculator for string input",
+  "version": "1.0.0",
+  "author": "Iris Hsu",
+  "main": "Calculator.js",
+  "bin": {
+    "calculate": "calculator.js"
+  }
+}
