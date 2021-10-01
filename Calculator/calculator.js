@@ -1,6 +1,7 @@
 #! /usr/bin/env node
 
 // Calculator
+// run npm link
 
 // Examples:
 // calculate "1 + 2" gives 3
