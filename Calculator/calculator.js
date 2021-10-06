@@ -1,6 +1,5 @@
 #! /usr/bin/env node
 
-// Calculator
 // run npm link
 
 // Examples:
@@ -17,103 +16,118 @@ const input = process.argv.slice(2)[0];
 function calculator(string) {
   // remove extra spaces; reduce +/- operators
   string = string.replace(/\s/g, "").replace("+-", "-").replace("--", "+");
-  console.log("string", string);
   let output;
   let nums = [];
 
   // operators
-  const add = (first, second) => {
-    return first + second;
-  };
-  const subtract = (first, second) => {
-    return first - second;
-  };
-  const multiply = (first, second) => {
-    return first * second;
-  };
-  const divide = (first, second) => {
-    return first / second;
-  };
+  const add = (a, b) => a + b;
+  const subtract = (a, b) => a - b;
+  const multiply = (a, b) => a * b;
+  const divide = (a, b) => a / b;
 
   // check if string contains invalid characters
   if (string.match(/[^0-9+\-*\/().]/g)) {
     return "Invalid Input";
   }
 
-  // add order of operations for parens
-  // if (string.includes("(") && string.includes(")")) {
-  //   let start = string.indexOf("(");
-  //   let end = string.indexOf(")");
-  //   console.log("startend", start, end);
-  // }
-
   // convert string to array of numbers and operators; string-to-number conversion
-  let convertedArr = string
+  let arr = string
     .replace(/\+/gi, ",+,")
     .replace(/\-/gi, ",-,")
     .replace(/\*/gi, ",*,")
     .replace(/\//gi, ",/,")
-    // .replace("(", ",(,")
-    // .replace(")", ",),")
+    .replace(/\(/gi, ",(,")
+    .replace(/\)/gi, ",),")
     .split(",")
-    .map((elem) => {
-      // if (elem === "(" || elem === ")") {
-      //   return elem;
-      // }
-      if (elem == Number(elem)) {
-        nums.push(Number(elem));
-        return Number(elem);
+    .map((el) => {
+      if (el == Number(el)) {
+        nums.push(Number(el));
+        return Number(el);
       } else {
-        return elem;
+        return el;
       }
     });
 
-  // helper function
-  const calculate = (op, calcFn) => {
-    let opIdx = convertedArr.indexOf(op);
-    let first = convertedArr[opIdx - 1];
-    let second = convertedArr[opIdx + 1];
-    output = calcFn(first, second);
-    convertedArr.splice(opIdx - 1, 3, output);
-  };
+  // check for balanced parens
+  function balancedParens(str) {
+    let openParensStack = [];
+    const openParens = {
+      "(": true,
+    };
+    const closeParens = {
+      ")": "(",
+    };
 
-  // reduce input down to single value
-  while (convertedArr.length > 1) {
-    console.log("initial", convertedArr);
+    for (let i = 0; i < str.length; i++) {
+      let el = str[i];
+      if (openParens[el]) {
+        openParensStack.push(el);
+      }
+      if (closeParens[el]) {
+        if (openParensStack.length === 0) {
+          return false;
+        } else if (
+          closeParens[el] === openParensStack[openParensStack.length - 1]
+        ) {
+          openParensStack.pop();
+        } else {
+          return false;
+        }
+      }
+    }
+    return !openParensStack.length;
+  }
+
+  // helper function
+  function calculate(array, op, calcFn) {
+    let opIdx = array.indexOf(op);
+    let a = array[opIdx - 1];
+    let b = array[opIdx + 1];
+    output = calcFn(a, b);
+    return array.splice(opIdx - 1, 3, output);
+  }
+
+  function orderOfOps(arr) {
     // do all multiplication/division operations first from left to right
-    while (convertedArr.includes("*") || convertedArr.includes("/")) {
-      for (let i = 0; i < convertedArr.length; i++) {
-        let elem = convertedArr[i];
-        if (elem === "*") {
-          calculate("*", multiply);
-          console.log("multiplied", convertedArr);
-        }
-        if (elem === "/") {
-          calculate("/", divide);
-          console.log("divided", convertedArr);
-        }
+    while (arr.includes("*") || arr.includes("/")) {
+      for (let i = 0; i < arr.length; i++) {
+        let el = arr[i];
+        if (el === "*") calculate(arr, "*", multiply);
+        if (el === "/") calculate(arr, "/", divide);
       }
     }
     // then add and subtract from left to right
-    for (let i = 0; i < convertedArr.length; i++) {
-      let elem = convertedArr[i];
-      if (elem === "+" || elem === "-") {
-        if (elem === "+") {
-          calculate("+", add);
-          console.log("added", convertedArr);
-        } else {
-          calculate("-", subtract);
-          console.log("subtracted", convertedArr);
-        }
+    while (arr.includes("+") || arr.includes("-")) {
+      for (let i = 0; i < arr.length; i++) {
+        let el = arr[i];
+        if (el === "+") calculate(arr, "+", add);
+        if (el === "-") calculate(arr, "-", subtract);
       }
     }
+    return arr;
   }
 
-  if (convertedArr.length === 1) {
-    console.log("answer", convertedArr[0]);
+  // reduce input down to single value
+  while (arr.length > 1) {
+    console.log("initial", arr);
+
+    // operate inside parens first
+    while (arr.includes("(")) {
+      let start = arr.indexOf("(");
+      let end = arr.indexOf(")");
+      let subArr = arr.slice(start + 1, end);
+      let [subtotal] = orderOfOps(subArr);
+      arr.splice(start - 1, end - start + 3, subtotal);
+    }
+
+    orderOfOps(arr);
   }
 
-  return convertedArr[0];
+  if (arr.length === 1) {
+    console.log("answer", arr[0]);
+  }
+
+  return arr[0];
 }
 
 console.log(calculator(input));
