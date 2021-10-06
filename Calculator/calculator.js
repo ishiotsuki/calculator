@@ -14,17 +14,31 @@
 const input = process.argv.slice(2)[0];
 
 function calculator(string) {
-  // remove extra spaces; reduce +/- operators
-  string = string.replace(/\s/g, "").replace("+-", "-").replace("--", "+");
-  console.log("string", string);
+  // remove extra spaces
+  string = string.replace(/\s/g, "");
 
-  // check if string contains invalid characters
+  // error handling if string contains more than 2 operators in a row, or if there are 2 operators but the second is not a minus
+  for (let i = 0; i < string.length; i++) {
+    if (
+      (string[i].match(/[^0-9().]/) &&
+        string[i + 1].match(/[^0-9().]/) &&
+        string[i + 2].match(/[^0-9().]/)) ||
+      (string[i].match(/[^0-9().]/) && string[i + 1].match(/[^0-9().\-]/))
+    ) {
+      return "Syntax Error";
+    }
+  }
+
+  // error handling if string contains invalid characters
   if (string.match(/[^0-9+\-*\/().]/g)) {
     return "Invalid Input";
   }
 
-  // convert string to array of numbers and operators; string-to-number conversion
+  // convert string to array of numbers and operators
   let arr = string
+    // reduce +/- operators
+    .replace("+-", "-")
+    .replace("--", "+")
     .replace(/\+/gi, ",+,")
     .replace(/\-/gi, ",-,")
     .replace(/\*/gi, ",*,")
@@ -32,6 +46,7 @@ function calculator(string) {
     .replace(/\(/gi, ",(,")
     .replace(/\)/gi, ",),")
     .split(",")
+    // string-to-number conversion
     .map((el) => {
       if (el == Number(el)) {
         return Number(el);
@@ -58,17 +73,13 @@ function calculator(string) {
   function parseItem(arr, idx) {
     // first check for first index of close parens, then loop backwards to find innermost subArr or first subArr
     if (arr.includes("(") && arr.includes(")")) {
-      console.log("parens while loop");
       let end = arr.indexOf(")");
       for (let j = end; j > idx; j--) {
         if (arr[j] === "(") {
           let start = j;
           let subArr = arr.slice(start + 1, end);
-          console.log("subarr", subArr);
           let [subtotal] = parseExpression(subArr, 0);
-          console.log("subtotal", subtotal);
           arr.splice(start - 1, end - start + 3, subtotal);
-          console.log("arr", arr);
           parseItem(arr, 0);
         }
       }
