@@ -3,7 +3,7 @@
   "description": "command line calculator for string input",
   "version": "1.0.0",
   "author": "Iris Hsu",
-  "main": "Calculator.js",
+  "main": "calculator.js",
   "bin": {
     "calculate": "calculator.js"
   }

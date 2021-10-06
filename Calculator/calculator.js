@@ -2,15 +2,6 @@
 
 // run npm link
 
-// Examples:
-// calculate "1 + 2" gives 3
-// calculate "4*5/2" gives 10
-// calculate "-5+-8--11*2" gives 9
-// calculate "-.32       /.5" gives -0.64
-// calculate "(4-2)*3.5" gives 7
-// calculate "2+-+-4" gives Syntax Error (or similar)
-// calculate "19 + cinnamon" gives Invalid Input (or similar)
-
 const input = process.argv.slice(2)[0];
 
 function calculator(string) {
@@ -71,26 +62,26 @@ function calculator(string) {
   };
 
   function parseItem(arr, idx) {
-    // first check for first index of close parens, then loop backwards to find innermost subArr or first subArr
+    // first check for first index of close parens, then loop backwards to find the closest open parens for the innermost subArr or the first subArr
     if (arr.includes("(") && arr.includes(")")) {
       let end = arr.indexOf(")");
       for (let j = end; j > idx; j--) {
         if (arr[j] === "(") {
           let start = j;
           let subArr = arr.slice(start + 1, end);
-          let [subtotal] = parseExpression(subArr, 0);
+          let [subtotal] = parseExpression(subArr);
           arr.splice(start - 1, end - start + 3, subtotal);
           parseItem(arr, 0);
         }
       }
     } else {
-      parseExpression(arr, 0);
+      parseExpression(arr);
     }
     return arr;
   }
 
-  function parseExpression(arr, idx) {
-    // if no additional parens
+  function parseExpression(arr) {
+    // if no additional parens, follow mathematical order of operations
     if (arr.includes("*") || arr.includes("/")) {
       parseTerm(arr);
     }
