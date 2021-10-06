@@ -17,13 +17,6 @@ function calculator(string) {
   // remove extra spaces; reduce +/- operators
   string = string.replace(/\s/g, "").replace("+-", "-").replace("--", "+");
   console.log("string", string);
-  let output;
-
-  // operators
-  const add = (a, b) => a + b;
-  const subtract = (a, b) => a - b;
-  const multiply = (a, b) => a * b;
-  const divide = (a, b) => a / b;
 
   // check if string contains invalid characters
   if (string.match(/[^0-9+\-*\/().]/g)) {
@@ -47,17 +40,23 @@ function calculator(string) {
       }
     });
 
-  // helper function
-  function calculate(array, op, calcFn) {
+  // operators
+  const add = (a, b) => a + b;
+  const subtract = (a, b) => a - b;
+  const multiply = (a, b) => a * b;
+  const divide = (a, b) => a / b;
+
+  // helper function for operators
+  const calculate = (array, op, calcFn) => {
     let opIdx = array.indexOf(op);
     let a = array[opIdx - 1];
     let b = array[opIdx + 1];
-    output = calcFn(a, b);
+    let output = calcFn(a, b);
     return array.splice(opIdx - 1, 3, output);
-  }
+  };
 
   function parseItem(arr, idx) {
-    // check for first index of close parens, then loop backwards to find innermost subArr or first subArr
+    // first check for first index of close parens, then loop backwards to find innermost subArr or first subArr
     if (arr.includes("(") && arr.includes(")")) {
       console.log("parens while loop");
       let end = arr.indexOf(")");
@@ -105,12 +104,7 @@ function calculator(string) {
     return arr;
   }
 
-  if (arr.includes("(") && arr.includes(")")) {
-    console.log("parens");
-    parseItem(arr, 0);
-  } else {
-    parseExpression(arr, 0);
-  }
+  parseItem(arr, 0);
 
   return arr[0];
 }
